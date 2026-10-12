@@ -53,10 +53,10 @@ public class Main extends Mod {
         }
         
         private synchronized void replaceBundle() {
-            Events.on(EventType.ClientLoadEvent.class, new Cons<EventType.ClientLoadEvent>() {
+            Events.on(EventType.ClientLoadEvent.class, new Cons<>() {
                 @Override
                 public void get(EventType.ClientLoadEvent clientLoadEvent) {
-                    synchronized (this) {
+                    synchronized (BundleChanger.this) {
                         while (isLocked) {
                             try {
                                 wait();
