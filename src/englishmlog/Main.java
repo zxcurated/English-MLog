@@ -41,6 +41,8 @@ public class Main extends Mod {
                     line.startsWith("contenttype.label") ||
                     line.startsWith("blockflag.label") ||
                     line.startsWith("lenum") ||
+                    line.startsWith("lunitcontrol") ||
+                    line.startsWith("llocate") ||
                     line.startsWith("playsound") ||
                     line.startsWith("unitlocate") ||
                     line.startsWith("control") ||
