@@ -1,0 +1,15 @@
+displayName: English MLog
+
+name: english-mlog
+
+author: J7
+
+main: englishmlog.Main
+
+repo: zxcurated/English-MLog
+
+version: 1.0
+
+minGameVersion: 154
+
+java: true
