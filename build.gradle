@@ -30,8 +30,8 @@ repositories{
 }
 
 java{
-    targetCompatibility = JavaVersion.VERSION_17
-    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_21
 }
 
 ext{
@@ -84,6 +84,13 @@ jar{
 
     from("assets/"){
         include "**"
+    }
+
+    doLast{
+        copy{
+            from archiveFile
+            into new File("../../AppData/Roaming/Mindustry/mods/")
+        }
     }
 }
 
