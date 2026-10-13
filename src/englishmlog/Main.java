@@ -4,8 +4,8 @@ import arc.Core;
 import arc.Events;
 import arc.func.Cons;
 import mindustry.game.EventType;
+import mindustry.game.EventType.ClientLoadEvent;
 import mindustry.mod.Mod;
-
 import java.util.stream.Stream;
 
 public class Main extends Mod {
@@ -21,7 +21,13 @@ public class Main extends Mod {
         @Override
         public void run() {
             initLines();
-            replaceBundle();
+            Events.on(ClientLoadEvent.class, new Cons<>() {
+                @Override
+                public void get(ClientLoadEvent clientLoadEvent) {
+                    replaceBundle();
+                    Core.app.post(() -> Events.remove(ClientLoadEvent.class, this));
+                }
+            });
         }
         
         private synchronized void initLines() {
@@ -53,28 +59,21 @@ public class Main extends Mod {
         }
         
         private synchronized void replaceBundle() {
-            Events.on(EventType.ClientLoadEvent.class, new Cons<>() {
-                @Override
-                public void get(EventType.ClientLoadEvent clientLoadEvent) {
-                    synchronized (BundleChanger.this) {
-                        while (isLocked) {
-                            try {
-                                wait();
-                            } catch (InterruptedException e) {
-                                throw new RuntimeException(e);
-                            }
-                        }
-                    }
-                    
-                    var properties = Core.bundle.getProperties();
-                    lines.forEach(line -> {
-                        String[] keyValue = line.split(" = ");
-                        properties.put(keyValue[0], keyValue[1]);
-                    });
-                    
-                    Core.app.post(() -> Events.remove(EventType.ClientLoadEvent.class, this));
+            while (isLocked) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
+            }
+            
+            var properties = Core.bundle.getProperties();
+            lines.forEach(line -> {
+                String[] keyValue = line.split(" = ");
+                properties.put(keyValue[0], keyValue[1]);
             });
+            
+            Core.app.post(() -> Events.remove(EventType.ClientLoadEvent.class, this));
         }
     }
 }
