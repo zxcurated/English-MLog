@@ -3,10 +3,9 @@ package englishmlog;
 import arc.Core;
 import arc.Events;
 import arc.func.Cons;
-import mindustry.game.EventType;
 import mindustry.game.EventType.ClientLoadEvent;
 import mindustry.mod.Mod;
-import java.util.stream.Stream;
+import java.util.List;
 
 public class Main extends Mod {
     
@@ -15,22 +14,17 @@ public class Main extends Mod {
     }
     
     private static class BundleChanger extends Thread {
-        private boolean isLocked = true;
-        private Stream<String> lines;
+        private List<String> lines;
         
         @Override
         public void run() {
-            initLines();
-            Events.on(ClientLoadEvent.class, new Cons<>() {
-                @Override
-                public void get(ClientLoadEvent clientLoadEvent) {
-                    replaceBundle();
-                    Core.app.post(() -> Events.remove(ClientLoadEvent.class, this));
-                }
-            });
+            readEnglishLines();
+            Events.on(ClientLoadEvent.class, e ->
+                replaceBundle()
+            );
         }
         
-        private synchronized void initLines() {
+        private synchronized void readEnglishLines() {
             lines =
                 Core.files.internal("bundles/bundle.properties")
                     .readString()
@@ -52,28 +46,16 @@ public class Main extends Mod {
                         line.startsWith("control") ||
                         line.startsWith("unitradar") ||
                         line.startsWith("radar") ||
-                        line.startsWith("sensor"));
-            
-            isLocked = false;
-            this.notify();
+                        line.startsWith("sensor"))
+                    .toList();
         }
         
         private synchronized void replaceBundle() {
-            while (isLocked) {
-                try {
-                    wait();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            
             var properties = Core.bundle.getProperties();
             lines.forEach(line -> {
                 String[] keyValue = line.split(" = ");
                 properties.put(keyValue[0], keyValue[1]);
             });
-            
-            Core.app.post(() -> Events.remove(EventType.ClientLoadEvent.class, this));
         }
     }
 }
